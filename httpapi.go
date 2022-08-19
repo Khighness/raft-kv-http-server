@@ -14,7 +14,7 @@ import (
 // @Since  2022-08-16
 
 type httpKVAPI struct {
-	store       *kvStore
+	store       *kvstore
 	confChangeC chan<- raftpb.ConfChange
 }
 
@@ -83,8 +83,8 @@ func (h *httpKVAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func serveHttpKVAPI(kvStore *kvStore, port int, confChangeC chan<- raftpb.ConfChange, errorC <-chan error) {
-	addr := fmt.Sprintf("0.0.0.0:%v", port)
+func serveHttpKVAPI(kvStore *kvstore, port int, confChangeC chan<- raftpb.ConfChange, errorC <-chan error) {
+	addr := fmt.Sprintf("127.0.0.1:%v", port)
 	httpServer := http.Server{
 		Addr: addr,
 		Handler: &httpKVAPI{

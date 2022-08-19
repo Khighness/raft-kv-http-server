@@ -23,10 +23,10 @@ func main() {
 	confChangeC := make(chan raftpb.ConfChange)
 	defer close(confChangeC)
 
-	var kvStore *kvStore
+	var kvStore *kvstore
 	getSnapshot := func() ([]byte, error) { return kvStore.getSnapshot() }
-	commitC, errorC, snapshotterReady := NewRaftNode(*id, strings.Split(*cluster, ","), *join, getSnapshot, proposeC, confChangeC)
+	commitC, errorC, snapshotterReady := newRaftNode(*id, strings.Split(*cluster, ","), *join, getSnapshot, proposeC, confChangeC)
 
-	kvStore = NewKVStore(<-snapshotterReady, proposeC, commitC, errorC)
+	kvStore = newKVStore(<-snapshotterReady, proposeC, commitC, errorC)
 	serveHttpKVAPI(kvStore, *kvPort, confChangeC, errorC)
 }

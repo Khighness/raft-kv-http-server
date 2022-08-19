@@ -66,7 +66,7 @@ type raftNode struct {
 
 var defaultSnapshotCount uint64 = 10000
 
-func NewRaftNode(id int, peers []string, join bool, getSnapshot func() ([]byte, error),
+func newRaftNode(id int, peers []string, join bool, getSnapshot func() ([]byte, error),
 	proposeC <-chan string, confChangeC <-chan raftpb.ConfChange) (<-chan *commit, <-chan error, <-chan *snap.Snapshotter) {
 
 	commitC := make(chan *commit)
@@ -81,7 +81,7 @@ func NewRaftNode(id int, peers []string, join bool, getSnapshot func() ([]byte, 
 		peers:       peers,
 		join:        join,
 		walDir:      fmt.Sprintf("raft-kv-svc-%d", id),
-		snapDir:     fmt.Sprintf("raft-kv-svc-%d", id),
+		snapDir:     fmt.Sprintf("raft-kv-svc-snaoshot%d", id),
 		getSnapshot: getSnapshot,
 		confState:   raftpb.ConfState{},
 
@@ -199,7 +199,8 @@ func (r *raftNode) loadSnapshot() *raftpb.Snapshot {
 // openWAL returns a WAL ready for reading.
 func (r *raftNode) openWAL(snapshot *raftpb.Snapshot) *wal.WAL {
 	if !wal.Exist(r.walDir) {
-		if err := os.Mkdir(r.walDir, 0750); err != nil {
+		err := os.Mkdir(r.walDir, 0750)
+		if err != nil {
 			logger.Fatalf("[raft] cannot create dir for wal: %v", err)
 		}
 		w, err := wal.Create(zap.NewExample(), r.walDir, nil)
@@ -473,11 +474,12 @@ func (r *raftNode) serveRaft() {
 		logger.Fatalf("[raft] failed to parse url: %v", err)
 	}
 
-	listener, err := NewStoppableListener(url.Host, r.httpStopC)
+	listener, err := newStoppableListener(url.Host, r.httpStopC)
 	if err != nil {
 		logger.Fatalf("[raft] failed ti listen rafthttp: %v", err)
 	}
 
+	logger.Infof("[raft] http is listeing at %s", url.Host)
 	err = (&http.Server{Handler: r.transport.Handler()}).Serve(listener)
 	select {
 	case <-r.httpStopC:
