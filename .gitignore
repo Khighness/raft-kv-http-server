@@ -1,0 +1,10 @@
+.DS_Store
+
+# Goland workspace
+.idea/
+
+# log
+log/
+.log
+
+raft-kv-svc-*/
