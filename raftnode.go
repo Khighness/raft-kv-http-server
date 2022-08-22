@@ -421,7 +421,7 @@ func (r *raftNode) publishEntries(ents []raftpb.Entry) (<-chan struct{}, bool) {
 	return applyDoneC, true
 }
 
-var snapshotCatupUpEntriesN uint64 = 10000
+var snapshotCatchUpEntriesN uint64 = 10000
 
 func (r *raftNode) maybeTriggerSnapshot(applyDoneC <-chan struct{}) {
 	if r.appliedIndex-r.snapshotIndex <= r.snapCount {
@@ -451,8 +451,8 @@ func (r *raftNode) maybeTriggerSnapshot(applyDoneC <-chan struct{}) {
 	}
 
 	compactIndex := uint64(1)
-	if r.appliedIndex > snapshotCatupUpEntriesN {
-		compactIndex = r.appliedIndex - snapshotCatupUpEntriesN
+	if r.appliedIndex > snapshotCatchUpEntriesN {
+		compactIndex = r.appliedIndex - snapshotCatchUpEntriesN
 	}
 	if err = r.raftStorage.Compact(compactIndex); err != nil {
 		logger.Panicf("[raft] %v", err)
