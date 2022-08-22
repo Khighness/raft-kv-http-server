@@ -53,12 +53,12 @@ func (h *httpKVAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		confChange := raftpb.ConfChange{
+		cc := raftpb.ConfChange{
 			Type:    raftpb.ConfChangeAddNode,
 			NodeID:  nodeId,
 			Context: url,
 		}
-		h.confChangeC <- confChange
+		h.confChangeC <- cc
 		w.WriteHeader(http.StatusNoContent)
 	case http.MethodDelete:
 		nodeId, err := strconv.ParseUint(key[1:], 0, 64)
@@ -68,11 +68,11 @@ func (h *httpKVAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		confChange := raftpb.ConfChange{
+		cc := raftpb.ConfChange{
 			Type:   raftpb.ConfChangeRemoveNode,
 			NodeID: nodeId,
 		}
-		h.confChangeC <- confChange
+		h.confChangeC <- cc
 		w.WriteHeader(http.StatusNoContent)
 	default:
 		w.Header().Add("Allow", http.MethodPut)

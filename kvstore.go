@@ -31,7 +31,7 @@ func newKVStore(snapshotter *snap.Snapshotter, proposeC chan<- string, commitC <
 	s := &kvstore{proposeC: proposeC, kvStore: make(map[string]string), snapshotter: snapshotter}
 	snapshot, err := s.loadSnapshot()
 	if err != nil {
-		logger.Panic(err)
+		logger.Panicf("[store] %v", err)
 	}
 	if snapshot != nil {
 		logger.Infof("[store] loading snapshot at term %d and index %d", snapshot.Metadata.Term, snapshot.Metadata.Index)
@@ -65,12 +65,12 @@ func (s *kvstore) readCommits(commitC <-chan *commit, errorC <-chan error) {
 			// signaled to load snapshot
 			snapshot, err := s.loadSnapshot()
 			if err != nil {
-				logger.Panic(err)
+				logger.Panicf("[store] %v", err)
 			}
 			if snapshot != nil {
 				logger.Infof("[store] loading snapshot at term %d and index %d", snapshot.Metadata.Term, snapshot.Metadata.Index)
 				if err := s.recoverFromSnapshot(snapshot.Data); err != nil {
-					logger.Panic(err)
+					logger.Panicf("[store] %v", err)
 				}
 			}
 			continue
